@@ -146,9 +146,13 @@ var mountCmd = &cobra.Command{
 				continue
 			}
 
-			port = tunnel.NextFreePort(port)
+			ap, err := tunnel.AllocatePort(port)
+			if err != nil {
+				return fmt.Errorf("allocating port for %s: %w", name, err)
+			}
+			allocPort := ap.Port
 
-			// Start sshd
+			// Start sshd (port is held by listener, no TOCTOU window)
 			fmt.Printf("  Starting sshd: %s...\n", name)
 			execCmdOutput("gh", "cs", "ssh", "-c", name, "--", "sudo", "service", "ssh", "start")
 
@@ -156,25 +160,28 @@ var mountCmd = &cobra.Command{
 			sshPort := detectSSHPort(name)
 			fmt.Printf("  SSH port: %d\n", sshPort)
 
-			fmt.Printf("  Starting tunnel: %s → local %d\n", name, port)
-			tunCmd, err := tunnel.StartTunnel(name, port, sshPort)
+			// Release the port right before starting the tunnel
+			fmt.Printf("  Starting tunnel: %s → local %d\n", name, allocPort)
+			ap.Close()
+			tunCmd, err := tunnel.StartTunnel(name, allocPort, sshPort)
 			if err != nil {
 				return fmt.Errorf("tunnel start failed for %s: %w", name, err)
 			}
 
-			ready := tunnel.WaitPort(port, 30*time.Second)
+			ready := tunnel.WaitPort(allocPort, 30*time.Second)
 			if !ready {
 				fmt.Printf("  Tunnel failed: %s\n", name)
 				if tunCmd.Process != nil {
 					tunCmd.Process.Kill()
 				}
+				ap.Close()
 				port++
 				continue
 			}
 
 			fmt.Printf("  Tunnel ready: %s\n", name)
 
-			if err := rclone.NewSFTPRemote(remoteName, port, KeyFile); err != nil {
+			if err := rclone.NewSFTPRemote(remoteName, allocPort, KeyFile); err != nil {
 				return fmt.Errorf("creating rclone remote for %s: %w", name, err)
 			}
 
@@ -182,14 +189,15 @@ var mountCmd = &cobra.Command{
 			s.Remotes = append(s.Remotes, state.Remote{
 				Name:       remoteName,
 				Codespace:  name,
-				Port:       port,
+				Port:       allocPort,
 				TunnelPid:  tunCmd.Process.Pid,
 				FolderPath: folderPath,
 			})
 
 			upstreams = append(upstreams, rclone.Upstream{FolderPath: folderPath, Remote: remoteName})
 
-			port++
+			ap.Close()
+			port = allocPort + 1
 		}
 
 		if len(upstreams) == 0 {

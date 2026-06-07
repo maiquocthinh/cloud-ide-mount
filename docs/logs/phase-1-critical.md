@@ -36,3 +36,32 @@
 - `killPid()` đã được xoá khỏi `cmd/unmount.go`. Không còn `time.Sleep(time.Second)` sau kill.
 - Cơ chế mới: Kill → Wait(timeout) → báo lỗi nếu process không exit.
 - Issue #2 done. Tiếp theo: Issue #3 (Port allocation TOCTOU).
+
+## 2026-06-07 (tiếp)
+
+### Làm
+- [x] #3.1: Tạo `internal/tunnel/port.go` — `AllocatePort(from)` dùng `net.Listen()` atomic
+  - `AllocatedPort` struct giữ listener, đảm bảo port không bị chiếm
+  - `Close()` idempotent (an toàn gọi nhiều lần)
+- [x] #3.2: Cập nhật `cmd/mount.go` — thay `NextFreePort` bằng `AllocatePort`
+  - Listener mở trong suốt setup (sshd, detect port)
+  - `ap.Close()` ngay trước `StartTunnel` → window TOCTOU giảm từ ~giây xuống ~micro-giây
+- [x] #3.3: Cập nhật `internal/tunnel/tunnel.go` — `NextFreePort` deprecated, delegate sang `AllocatePort`
+- [x] #3.4: Viết 6 test cases trong `internal/tunnel/port_test.go`
+  - `TestAllocatePort`: allocation cơ bản, verify port đang listen
+  - `TestAllocatePortRespectsBusyPort`: skip port đã được dùng
+  - `TestAllocatePortReleasesOnClose`: port free sau Close
+  - `TestAllocatePortCloseIdempotent`: Close 2 lần không panic
+  - `TestConcurrentAllocationNoDuplicatePorts`: 20 goroutine đồng thời, không duplicate
+  - `TestAllocatePortLargeOffset`: high port range
+
+### Kết quả
+- Build: ✅ pass
+- Test: ✅ `go test -race -v ./...` — 17/17 pass, không race
+- Vet: ✅ `go vet ./...` — clean
+
+### Ghi chú
+- `AllocatePort` thay thế hoàn toàn `NextFreePort` trong mount workflow.
+- `net.Listen` là atomic operation — chỉ một process có thể bind thành công.
+- `ap.Close()` set `ap.listener = nil` để idempotent, tránh double-close panic.
+- Issue #3 done. Tiếp theo: Issue #4 (Silent error handling).

@@ -30,11 +30,15 @@ func WaitPort(port int, timeout time.Duration) bool {
 	return false
 }
 
+// NextFreePort returns the next free port starting from 'from'.
+// Deprecated: Use AllocatePort for atomic allocation that avoids TOCTOU races.
 func NextFreePort(from int) int {
-	p := from
-	for PortOpen(p) {
-		p++
+	ap, err := AllocatePort(from)
+	if err != nil {
+		return from
 	}
+	p := ap.Port
+	ap.Close()
 	return p
 }
 
