@@ -26,12 +26,14 @@ func createConfig(args ...string) error {
 	return cmd.Run()
 }
 
-func DeleteRemote(name string) {
-	_ = createConfig("config", "delete", name)
+func DeleteRemote(name string) error {
+	return createConfig("config", "delete", name)
 }
 
 func NewSFTPRemote(name string, port int, keyFile string) error {
-	DeleteRemote(name)
+	if err := DeleteRemote(name); err != nil {
+		return fmt.Errorf("deleting existing remote %s: %w", name, err)
+	}
 	return createConfig(
 		"config", "create", name, "sftp",
 		"host", "127.0.0.1",
@@ -43,7 +45,9 @@ func NewSFTPRemote(name string, port int, keyFile string) error {
 }
 
 func NewAliasRemote(name, target string) error {
-	DeleteRemote(name)
+	if err := DeleteRemote(name); err != nil {
+		return fmt.Errorf("deleting existing alias %s: %w", name, err)
+	}
 	return createConfig("config", "create", name, "alias", "remote", target)
 }
 
@@ -63,8 +67,12 @@ func SetCombineRemote(name string, newUpstreams []Upstream) error {
 
 		safePath := regexp.MustCompile(`[^a-zA-Z0-9_-]`).ReplaceAllString(u.FolderPath, "-")
 		aliasName := "cs-alias-" + safePath
-		DeleteRemote(aliasName)
-		_ = createConfig("config", "create", aliasName, "alias", "remote", u.Remote+":/")
+		if err := DeleteRemote(aliasName); err != nil {
+			return fmt.Errorf("deleting alias %s: %w", aliasName, err)
+		}
+		if err := createConfig("config", "create", aliasName, "alias", "remote", u.Remote+":/"); err != nil {
+			return fmt.Errorf("creating alias %s: %w", aliasName, err)
+		}
 
 		if _, ok := orgs[org]; !ok {
 			orgs[org] = &orgEntry{}
@@ -76,9 +84,13 @@ func SetCombineRemote(name string, newUpstreams []Upstream) error {
 	// Create sub-combine for each org
 	for _, org := range orgOrder {
 		subName := "cs-combine-" + org
-		DeleteRemote(subName)
+		if err := DeleteRemote(subName); err != nil {
+			return fmt.Errorf("deleting sub-combine %s: %w", subName, err)
+		}
 		upstreamsText := strings.Join(orgs[org].repos, " ")
-		_ = createConfig("config", "create", subName, "combine", "upstreams", upstreamsText)
+		if err := createConfig("config", "create", subName, "combine", "upstreams", upstreamsText); err != nil {
+			return fmt.Errorf("creating sub-combine %s: %w", subName, err)
+		}
 	}
 
 	// Create top-level combine
@@ -87,7 +99,9 @@ func SetCombineRemote(name string, newUpstreams []Upstream) error {
 		topParts = append(topParts, org+"=cs-combine-"+org+":")
 	}
 
-	DeleteRemote(name)
+	if err := DeleteRemote(name); err != nil {
+		return fmt.Errorf("deleting combine %s: %w", name, err)
+	}
 	return createConfig("config", "create", name, "combine", "upstreams", strings.Join(topParts, " "))
 }
 

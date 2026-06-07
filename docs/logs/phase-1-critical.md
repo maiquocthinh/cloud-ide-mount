@@ -64,4 +64,30 @@
 - `AllocatePort` thay thế hoàn toàn `NextFreePort` trong mount workflow.
 - `net.Listen` là atomic operation — chỉ một process có thể bind thành công.
 - `ap.Close()` set `ap.listener = nil` để idempotent, tránh double-close panic.
-- Issue #3 done. Tiếp theo: Issue #4 (Silent error handling).
+## 2026-06-07 (tiếp)
+
+### Làm
+- [x] #4.1: Soát silent errors trong toàn bộ codebase — phát hiện 16 vị trí
+  - 🔴 Critical: mount.go (sshd start, state.Save, SetCombineRemote), open.go (cs.List), rclone.go (DeleteRemote)
+  - 🟡 Medium: mount.go/unmount.go KillProcess warnings, unmount.go DeleteRemote/Remove/Save
+  - 🟢 Low: ide.go MkdirAll, ui.go state.Load, tunnel.go Read/SetReadDeadline
+- [x] #4.2: Sửa 5 files:
+  - `internal/rclone/rclone.go`: `DeleteRemote` return error; all `_ = createConfig(...)` → propagate errors
+  - `internal/ide/ide.go`: check MkdirAll + ReadFile errors
+  - `cmd/mount.go`: fix sshd start silent fail, state.Save ignore, SetCombineRemote không continue khi lỗi, tất cả ap.Close() check error
+  - `cmd/unmount.go`: fix state.Remove/state.Save/DeleteRemote errors
+  - `cmd/open.go`: fix `codespace.List()` err bị discard
+- [x] #4.3: Đảm bảo CLI layer hiển thị lỗi — tất cả errors được return qua RunE → cobra display stderr
+- [x] #4.4: Thêm 10 tests mới:
+  - 3 tests cho `internal/ide` (ensureSSHConfig tạo file, không duplicate, lỗi dir)
+  - 7 tests cho `cmd/mount` (findFolderPath, detectSSHPort, execLook, checkDeps mock)
+  - Refactor: `execLook` function → var để mock trong test
+
+### Kết quả
+- Build: ✅ pass
+- Test: ✅ `go test -race -v ./...` — 25/25 pass, không race
+- Vet: ✅ `go vet ./...` — clean
+- Coverage mới: 10 tests (3 ide + 7 cmd)
+
+### Ghi chú
+- Issue #4 done. Tiếp theo: Issue #5 (mount.go complexity).

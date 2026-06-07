@@ -41,9 +41,14 @@ func Available() []IDE {
 func ensureSSHConfig(info SSHInfo) error {
 	sshDir := filepath.Join(os.Getenv("USERPROFILE"), ".ssh")
 	configPath := filepath.Join(sshDir, "config")
-	os.MkdirAll(sshDir, 0700)
+	if err := os.MkdirAll(sshDir, 0700); err != nil {
+		return fmt.Errorf("creating SSH config dir: %w", err)
+	}
 
-	data, _ := os.ReadFile(configPath)
+	data, err := os.ReadFile(configPath)
+	if err != nil && !os.IsNotExist(err) {
+		return fmt.Errorf("reading SSH config: %w", err)
+	}
 	if strings.Contains(string(data), "Host "+info.Alias) {
 		return nil
 	}

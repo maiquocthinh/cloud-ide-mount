@@ -92,18 +92,26 @@ var unmountCmd = &cobra.Command{
 				}
 			}
 			killPortListeners(r.Port)
-			rclone.DeleteRemote(r.Name)
+			if err := rclone.DeleteRemote(r.Name); err != nil {
+				fmt.Printf("  Warning: deleting remote %s: %v\n", r.Name, err)
+			}
 		}
 
 		if len(remainingMounts) == 0 {
-			rclone.DeleteRemote(CombineRemote)
-			s.Remove()
+			if err := rclone.DeleteRemote(CombineRemote); err != nil {
+				fmt.Printf("  Warning: deleting combine remote %s: %v\n", CombineRemote, err)
+			}
+			if err := s.Remove(); err != nil {
+				return fmt.Errorf("clearing state file: %w", err)
+			}
 			fmt.Println()
 			fmt.Println("  All unmounted. State cleared.")
 		} else {
 			s.Remotes = remainingRemotes
 			s.Mounts = remainingMounts
-			state.Save(s)
+			if err := state.Save(s); err != nil {
+				return fmt.Errorf("saving state after unmount: %w", err)
+			}
 			fmt.Println()
 			fmt.Printf("  Unmounted. %d drive(s) still active.\n", len(remainingMounts))
 		}

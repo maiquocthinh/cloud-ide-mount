@@ -49,7 +49,9 @@ var mountCmd = &cobra.Command{
 					continue
 				}
 				fmt.Printf("  Starting codespace: %s...\n", cs.Name)
-				execCmdOutput("gh", "cs", "start", "-c", cs.Name)
+				if _, err := execCmdOutput("gh", "cs", "start", "-c", cs.Name); err != nil {
+					return fmt.Errorf("starting codespace %s: %w", cs.Name, err)
+				}
 				for {
 					out, err := execCmdOutput("gh", "cs", "view", "-c", cs.Name, "--json", "state")
 					if err == nil {
@@ -154,7 +156,9 @@ var mountCmd = &cobra.Command{
 
 			// Start sshd (port is held by listener, no TOCTOU window)
 			fmt.Printf("  Starting sshd: %s...\n", name)
-			execCmdOutput("gh", "cs", "ssh", "-c", name, "--", "sudo", "service", "ssh", "start")
+			if _, err := execCmdOutput("gh", "cs", "ssh", "-c", name, "--", "sudo", "service", "ssh", "start"); err != nil {
+				fmt.Printf("  Warning: sshd start may have failed: %v (continuing)\n", err)
+			}
 
 			// Detect SSH port first, then tunnel with correct port
 			sshPort := detectSSHPort(name)
@@ -162,7 +166,9 @@ var mountCmd = &cobra.Command{
 
 			// Release the port right before starting the tunnel
 			fmt.Printf("  Starting tunnel: %s → local %d\n", name, allocPort)
-			ap.Close()
+			if err := ap.Close(); err != nil {
+				fmt.Printf("  Warning: error releasing temporary port %d: %v\n", allocPort, err)
+			}
 			tunCmd, err := tunnel.StartTunnel(name, allocPort, sshPort)
 			if err != nil {
 				return fmt.Errorf("tunnel start failed for %s: %w", name, err)
@@ -172,9 +178,13 @@ var mountCmd = &cobra.Command{
 			if !ready {
 				fmt.Printf("  Tunnel failed: %s\n", name)
 				if tunCmd.Process != nil {
-					tunCmd.Process.Kill()
+					if err := tunCmd.Process.Kill(); err != nil {
+						fmt.Printf("  Warning: error killing failed tunnel: %v\n", err)
+					}
 				}
-				ap.Close()
+				if err := ap.Close(); err != nil {
+					fmt.Printf("  Warning: error releasing failed port: %v\n", err)
+				}
 				port++
 				continue
 			}
@@ -196,7 +206,9 @@ var mountCmd = &cobra.Command{
 
 			upstreams = append(upstreams, rclone.Upstream{FolderPath: folderPath, Remote: remoteName})
 
-			ap.Close()
+			if err := ap.Close(); err != nil {
+				fmt.Printf("  Warning: error releasing port %d: %v\n", allocPort, err)
+			}
 			port = allocPort + 1
 		}
 
@@ -229,7 +241,7 @@ var mountCmd = &cobra.Command{
 			fmt.Printf("  Mounting %s: → %s\n", CombineRemote, drive)
 			mp, err := rclone.Mount(CombineRemote, drive, "Codespaces")
 			if err != nil {
-				return err
+				return fmt.Errorf("mounting %s: %w", drive, err)
 			}
 
 			s.Mounts = append(s.Mounts, state.Mount{
@@ -279,7 +291,8 @@ var mountCmd = &cobra.Command{
 
 					fmt.Printf("  Building combine remote for %s...\n", drive)
 					if err := rclone.SetCombineRemote(CombineRemote, sharedUpstreams); err != nil {
-						fmt.Printf("  Combine remote error: %v\n", err)
+						fmt.Printf("  Combine remote error: %v (skipping %s)\n", err, drive)
+						continue
 					}
 
 					mp, err := rclone.Mount(CombineRemote, drive, "Codespaces")
@@ -351,7 +364,8 @@ var mountCmd = &cobra.Command{
 
 					fmt.Printf("  Building combine remote for %s...\n", drive)
 					if err := rclone.SetCombineRemote(CombineRemote, allUpstreams); err != nil {
-						fmt.Printf("  Combine remote error: %v\n", err)
+						fmt.Printf("  Combine remote error: %v (skipping %s)\n", err, drive)
+						continue
 					}
 
 					fmt.Printf("  Mounting %s → %s\n", csName, drive)
@@ -382,7 +396,9 @@ var mountCmd = &cobra.Command{
 			}
 		}
 
-		state.Save(s)
+		if err := state.Save(s); err != nil {
+			return fmt.Errorf("saving state: %w", err)
+		}
 		fmt.Println()
 		fmt.Println("  Done. Run status to verify.")
 		return nil
@@ -404,7 +420,7 @@ func checkDeps() error {
 	return nil
 }
 
-func execLook(name string) (string, error) {
+var execLook = func(name string) (string, error) {
 	return exec.LookPath(name)
 }
 
