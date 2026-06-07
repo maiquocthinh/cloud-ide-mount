@@ -1,7 +1,7 @@
 # Bảng Theo Dõi Dự Án
 
 **Tổng:** 24 hạng mục · 🔴 5 Critical · 🟡 3 High · 🔵 16 Normal
-**Tiến độ:** ▰▰▰▰▰▰▰▰▰▰ 4% (1/24)
+**Tiến độ:** ▰▰▰▰▰▰▰▰▰▰ 12% (3/24)
 
 ---
 
@@ -18,8 +18,8 @@
 
 | # | Hạng Mục | Loại | Status | Task Chi Tiết |
 |---|----------|------|--------|--------------|
-| 1 | Race condition state file | Bug | ⬜ | [tasks](./tasks/phase-1-critical.md) |
-| 2 | Process kill không atomic | Bug | ⬜ | — |
+| 1 | Race condition state file | Bug | ✅ | [tasks](./tasks/phase-1-critical.md) |
+| 2 | Process kill không atomic | Bug | ✅ | — |
 | 3 | Port allocation TOCTOU | Bug | ⬜ | — |
 | 4 | Silent error handling | Bug | ⬜ | — |
 | 5 | mount.go complexity | Refactor | ⬜ | — |

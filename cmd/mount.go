@@ -9,6 +9,7 @@ import (
 	"time"
 
 	"cloud-ide-mount/internal/codespace"
+	"cloud-ide-mount/internal/executil"
 	"cloud-ide-mount/internal/rclone"
 	"cloud-ide-mount/internal/state"
 	"cloud-ide-mount/internal/tunnel"
@@ -203,8 +204,9 @@ var mountCmd = &cobra.Command{
 				for i, m := range s.Mounts {
 					if m.Drive == drive {
 						fmt.Printf("  Stopping rclone on %s to rebuild combine...\n", drive)
-						killPid(m.RclonePid)
-						time.Sleep(time.Second)
+						if err := executil.KillProcess(m.RclonePid, 5*time.Second); err != nil {
+							fmt.Printf("  Warning: error stopping rclone PID %d: %v\n", m.RclonePid, err)
+						}
 						s.Mounts = append(s.Mounts[:i], s.Mounts[i+1:]...)
 						break
 					}
@@ -258,8 +260,10 @@ var mountCmd = &cobra.Command{
 
 					for i, m := range s.Mounts {
 						if m.Drive == drive {
-							killPid(m.RclonePid)
-							time.Sleep(time.Second)
+							fmt.Printf("  Stopping rclone on %s to rebuild combine...\n", drive)
+							if err := executil.KillProcess(m.RclonePid, 5*time.Second); err != nil {
+								fmt.Printf("  Warning: error stopping rclone PID %d: %v\n", m.RclonePid, err)
+							}
 							s.Mounts = append(s.Mounts[:i], s.Mounts[i+1:]...)
 							break
 						}
@@ -328,8 +332,10 @@ var mountCmd = &cobra.Command{
 
 					for i, m := range s.Mounts {
 						if m.Drive == drive {
-							killPid(m.RclonePid)
-							time.Sleep(time.Second)
+							fmt.Printf("  Stopping rclone on %s to rebuild combine...\n", drive)
+							if err := executil.KillProcess(m.RclonePid, 5*time.Second); err != nil {
+								fmt.Printf("  Warning: error stopping rclone PID %d: %v\n", m.RclonePid, err)
+							}
 							s.Mounts = append(s.Mounts[:i], s.Mounts[i+1:]...)
 							break
 						}
