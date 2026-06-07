@@ -1,7 +1,7 @@
 # Bảng Theo Dõi Dự Án
 
 **Tổng:** 24 hạng mục · 🔴 5 Critical · 🟡 3 High · 🔵 16 Normal
-**Tiến độ:** ▰▰▰▰▰▰▰▰▰▰▰ 38% (9/24)
+**Tiến độ:** ▰▰▰▰▰▰▰▰▰▰▰▰ 42% (10/24)
 
 ---
 
@@ -29,7 +29,7 @@
 
 | # | Hạng Mục | Loại | Status | Task Chi Tiết |
 |---|----------|------|--------|--------------|
-| 7 | Health checks | Feature | ⬜ | [tasks](./tasks/phase-2-high.md#7-health-checks) |
+| 7 | Health checks | Feature | ✅ | [tasks](./tasks/phase-2-high.md#7-health-checks) |
 | 8 | SSH port detection không ổn định | Bug | ⬜ | — |
 | 9 | Per-user state profiles | Feature | ⬜ | — |
 
