@@ -51,9 +51,21 @@ Giải quyết các issue High priority sau khi hoàn thành Phase 1 (Critical).
   - Remove `TestDetectSSHPort_DefaultOnError` from mount_test.go
 
 ### 9. Per-user state profiles
-- [ ] Chưa bắt đầu
-  - File: `internal/state/state.go`
-  - Ghi chú: ...
+- [x] #9.1: Add profile isolation to state package
+  - `SetProfile(name string)` — set profile before Load/Save/Remove
+  - `Profile()` — get current profile name
+  - `filePath()` — now returns `config/state-{profile}.json`
+  - Default profile: "default"
+- [x] #9.2: Add `--profile` / `-p` flag to root command
+  - Resolution priority: CLI flag → `CLOUD_IDE_MOUNT_PROFILE` env var → OS username → "default"
+  - Sanitize OS username (replace backslash with underscore for `DOMAIN\User`)
+  - `PersistentPreRunE` hook on rootCmd to resolve at startup
+- [x] #9.3: Update state tests for new file naming
+  - All test expectations changed from `state.json` to `state-default.json`
+- [x] #9.4: Update docs
+  - CHECKLIST.md — đánh dấu item 9 là ✅
+  - phase-2-high.md — task tracking (file này)
+  - logs/phase-2-high.md — log file
 
 ## Ghi Chú
 - Health checks sử dụng function var pattern (giống `var execLook` trong mount.go) để dễ test.

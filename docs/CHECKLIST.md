@@ -1,7 +1,7 @@
 # Bảng Theo Dõi Dự Án
 
 **Tổng:** 24 hạng mục · 🔴 5 Critical · 🟡 3 High · 🔵 16 Normal
-**Tiến độ:** ▰▰▰▰▰▰▰▰▰▰▰▰ 46% (11/24)
+**Tiến độ:** ▰▰▰▰▰▰▰▰▰▰▰▰▰ 50% (12/24)
 
 ---
 
@@ -31,7 +31,7 @@
 |---|----------|------|--------|--------------|
 | 7 | Health checks | Feature | ✅ | [tasks](./tasks/phase-2-high.md#7-health-checks) |
 | 8 | SSH port detection không ổn định | Bug | ✅ | [tasks](./tasks/phase-2-high.md#8-ssh-port-detection-không-ổn-định) |
-| 9 | Per-user state profiles | Feature | ⬜ | — |
+| 9 | Per-user state profiles | Feature | ✅ | [tasks](./tasks/phase-2-high.md#9-per-user-state-profiles) |
 
 ## ⬜ Phase 3: Production — v1.0
 
@@ -55,8 +55,13 @@
 - [x] Tất cả test pass
 - [ ] Logging hoạt động
 
+**v0.2:**
+- [x] Health checks
+- [x] SSH port detection không ổn định
+- [x] Per-user state profiles
+
 **v1.0:**
-- [ ] 17 issues resolved
+- [ ] 14 issues resolved
 - [ ] >50% test coverage
 - [ ] Multi-OS support
 
