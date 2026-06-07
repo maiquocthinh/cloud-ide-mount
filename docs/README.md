@@ -1,8 +1,17 @@
-# cloud-ide-mount
+# Cloud IDE Mount - Tài Liệu Triển Khai
 
 Mount cloud IDE workspace (GitHub Codespaces, Gitpod, AWS Cloud9) vào local drive.
 
-**📚 Tài Liệu:** Đọc [docs/README.md](./docs/README.md) để bắt đầu.
+## 📚 6 File
+
+| File | Mục Đích | Thời Gian |
+|------|---------|----------|
+| ARCHITECTURE.md | Kiến trúc 5 layer, 8 module | 30 phút |
+| IMPLEMENTATION.md | Hướng dẫn code, 5 issue fix | 60 phút |
+| CHECKLIST.md | Theo dõi 16 issue | 20 phút |
+| QUICK_REFERENCE.md | Tra cứu hàng ngày (bookmark) | 15 phút |
+| CLI_REFERENCE.md | Lệnh, flags, ví dụ | 15 phút |
+| README.md | Tổng quan (file này) | 2 phút |
 
 ## 🚀 Bắt Đầu
 
@@ -31,12 +40,8 @@ go test -v ./...
 
 ## 👉 Bước Tiếp Theo
 
-- **Lần đầu?** → [docs/ARCHITECTURE.md](docs/ARCHITECTURE.md)
-- **Sẵn sàng code?** → [docs/IMPLEMENTATION.md](docs/IMPLEMENTATION.md)
-- **Chọn issue?** → [docs/CHECKLIST.md](docs/CHECKLIST.md)
-- **Cần lệnh?** → [docs/CLI_REFERENCE.md](docs/CLI_REFERENCE.md)
-- **Hàng ngày?** → [docs/QUICK_REFERENCE.md](docs/QUICK_REFERENCE.md)
-
-## License
-
-MIT
+- **Lần đầu?** → ARCHITECTURE.md
+- **Sẵn sàng code?** → IMPLEMENTATION.md
+- **Chọn issue?** → CHECKLIST.md
+- **Cần lệnh?** → CLI_REFERENCE.md
+- **Hàng ngày?** → QUICK_REFERENCE.md
