@@ -120,17 +120,17 @@ jobs:
           go-version: '1.21'
           cache: true
 
-      - name: Cross-compile
-        shell: bash
-        run: |
-          os_arch=(${target//\// })
-          os_name=${os_arch[0]}
-          arch=${os_arch[1]}
-          ext=""
-          if [ "$os_name" = "windows" ]; then ext=".exe"; fi
-          GOOS=$os_name GOARCH=$arch go build -v \
-            -ldflags="-s -w -X main.version=$(git describe --tags 2>/dev/null || echo dev)" \
-            -o "dist/cloud-ide-mount-${os_name}-${arch}${ext}" .
+	      - name: Cross-compile
+	        shell: bash
+	        run: |
+	          os_arch=(${target//\// })
+	          os_name=${os_arch[0]}
+	          arch=${os_arch[1]}
+	          ext=""
+	          if [ "$os_name" = "windows" ]; then ext=".exe"; fi
+	          CGO_ENABLED=0 GOOS=$os_name GOARCH=$arch go build -v \
+	            -ldflags="-s -w -X main.version=$(git describe --tags 2>/dev/null || echo dev)" \
+	            -o "dist/cloud-ide-mount-${os_name}-${arch}${ext}" .
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4

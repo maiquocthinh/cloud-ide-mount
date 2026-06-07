@@ -6,7 +6,8 @@ import (
 	"os/exec"
 	"regexp"
 	"strings"
-	"syscall"
+
+	"cloud-ide-mount/internal/executil"
 )
 
 type Upstream struct {
@@ -99,7 +100,7 @@ func Mount(remote, drive, volname string) (*MountProcess, error) {
 		"--volname", volname,
 	}
 	cmd := exec.Command("rclone", args...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	cmd.SysProcAttr = executil.SysProcAttr()
 
 	stderr, err := cmd.StderrPipe()
 	if err != nil {

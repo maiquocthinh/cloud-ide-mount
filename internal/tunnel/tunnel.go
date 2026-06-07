@@ -5,8 +5,9 @@ import (
 	"net"
 	"os/exec"
 	"strings"
-	"syscall"
 	"time"
+
+	"cloud-ide-mount/internal/executil"
 )
 
 func PortOpen(port int) bool {
@@ -43,7 +44,7 @@ func StartTunnel(csName string, localPort, remotePort int) (*exec.Cmd, error) {
 		"--", "-N", "-L", fmt.Sprintf("127.0.0.1:%d:127.0.0.1:%d", localPort, remotePort),
 	}
 	cmd := exec.Command("gh", args...)
-	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
+	cmd.SysProcAttr = executil.SysProcAttr()
 	if err := cmd.Start(); err != nil {
 		return nil, fmt.Errorf("starting tunnel for %s: %w", csName, err)
 	}
