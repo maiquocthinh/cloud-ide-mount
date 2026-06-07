@@ -92,7 +92,7 @@ var unmountCmd = &cobra.Command{
 
 		if len(remainingMounts) == 0 {
 			rclone.DeleteRemote(CombineRemote)
-			state.Remove()
+			s.Remove()
 			fmt.Println()
 			fmt.Println("  All unmounted. State cleared.")
 		} else {
