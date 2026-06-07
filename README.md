@@ -42,12 +42,6 @@ cs-mount open
 - `--combine-remote NAME` — rclone combine remote name
 - `-f, --force` — Skip confirmations
 
-## ⚠️ Limitations
-
-**Not production ready.** v0 has 5 critical issues (race conditions, unsafe process management, port allocation, silent failures, complexity). Safe for personal development only.
-
-See `docs/report/` for detailed analysis.
-
 ## Architecture
 
 ```
