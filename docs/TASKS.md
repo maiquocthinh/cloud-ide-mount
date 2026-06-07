@@ -6,8 +6,11 @@ Hub này liệt kê các phase đang active và link đến file task chi tiết
 
 ## Đang Active
 
-- Phase 0: Thiết lập → [tasks/phase-0-setup.md](./tasks/phase-0-setup.md)
 - Phase 1: Critical — v0.1 → [tasks/phase-1-critical.md](./tasks/phase-1-critical.md)
+
+## Đã Hoàn Thành
+
+- Phase 0: Thiết lập → [tasks/phase-0-setup.md](./tasks/phase-0-setup.md)
 
 ## Chờ
 
