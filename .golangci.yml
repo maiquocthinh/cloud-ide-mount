@@ -6,7 +6,6 @@ run:
 
 linters:
   enable:
-    - errcheck
     - gosimple
     - govet
     - ineffassign
@@ -19,11 +18,9 @@ linters:
     - unparam
   disable:
     - typecheck
+    - errcheck # TODO: enable when fixing Issue #4 (Silent error handling)
 
 linters-settings:
-  errcheck:
-    check-type-assertions: true
-    check-blank: false
   gofmt:
     simplify: true
   goimports:

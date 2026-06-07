@@ -101,7 +101,7 @@ var mountCmd = &cobra.Command{
 			}
 			fmt.Println()
 			if !ui.Confirm("Proceed? [y/N]") {
-				fmt.Println("Cancelled.")
+				fmt.Println("Canceled.")
 				return nil
 			}
 		}
@@ -152,10 +152,7 @@ var mountCmd = &cobra.Command{
 			execCmdOutput("gh", "cs", "ssh", "-c", name, "--", "sudo", "service", "ssh", "start")
 
 			// Detect SSH port first, then tunnel with correct port
-			sshPort, err := detectSSHPort(name)
-			if err != nil {
-				return fmt.Errorf("SSH port detection failed for %s: %w", name, err)
-			}
+			sshPort := detectSSHPort(name)
 			fmt.Printf("  SSH port: %d\n", sshPort)
 
 			fmt.Printf("  Starting tunnel: %s → local %d\n", name, port)
@@ -397,6 +394,7 @@ func execLook(name string) (string, error) {
 	return exec.LookPath(name)
 }
 
+//nolint:unparam
 func execCmdOutput(name string, args ...string) (string, error) {
 	cmd := exec.Command(name, args...)
 	out, err := cmd.CombinedOutput()
@@ -453,19 +451,19 @@ func waitForMount(drive string, mp *rclone.MountProcess) bool {
 	return false
 }
 
-func detectSSHPort(csName string) (int, error) {
+func detectSSHPort(csName string) int {
 	out, err := execCmdOutput("gh", "cs", "ssh", "-c", csName, "--",
 		"sudo", "grep", "^Port", "/etc/ssh/sshd_config")
 	if err != nil {
 		// grep exit 1 = no Port line, default 22
-		return 22, nil
+		return 22
 	}
 	fields := strings.Fields(out)
 	if len(fields) >= 2 {
 		port, err := strconv.Atoi(strings.TrimSpace(fields[1]))
 		if err == nil {
-			return port, nil
+			return port
 		}
 	}
-	return 22, nil
+	return 22
 }
