@@ -4,7 +4,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"strconv"
 	"strings"
 	"time"
 
@@ -217,7 +216,7 @@ func orchestrateTunnels(available []codespace.Codespace, s *state.State, startPo
 			logging.Warn(fmt.Sprintf("sshd start may have failed: %v (continuing)", err), "codespace", name, "error", err)
 		}
 
-		sshPort := detectSSHPort(name)
+		sshPort := tunnel.DetectSSHPort(name)
 		logging.Info(fmt.Sprintf("SSH port: %d", sshPort), "codespace", name, "sshPort", sshPort)
 
 		logging.Info(fmt.Sprintf("Starting tunnel: %s -> local %d", name, allocPort), "codespace", name, "port", allocPort)
@@ -543,18 +542,3 @@ func waitForMount(drive string, mp *rclone.MountProcess) bool {
 	return false
 }
 
-func detectSSHPort(csName string) int {
-	out, err := execCmdOutput("gh", "cs", "ssh", "-c", csName, "--",
-		"sudo", "grep", "^Port", "/etc/ssh/sshd_config")
-	if err != nil {
-		return 22
-	}
-	fields := strings.Fields(out)
-	if len(fields) >= 2 {
-		port, err := strconv.Atoi(strings.TrimSpace(fields[1]))
-		if err == nil {
-			return port
-		}
-	}
-	return 22
-}

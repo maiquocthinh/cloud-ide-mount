@@ -35,14 +35,6 @@ func TestFindFolderPath(t *testing.T) {
 	}
 }
 
-func TestDetectSSHPort_DefaultOnError(t *testing.T) {
-	// When exec fails (e.g. no gh CLI), detectSSHPort should return 22 (default)
-	port := detectSSHPort("non-existent-cs")
-	if port != 22 {
-		t.Errorf("expected default port 22 on exec failure, got %d", port)
-	}
-}
-
 func TestExecLook_NotFound(t *testing.T) {
 	_, err := execLook("this-command-does-not-exist-12345")
 	if err == nil {
