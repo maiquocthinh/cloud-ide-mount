@@ -39,10 +39,14 @@ Sửa 5 bug critical + thêm logging để đảm bảo ổn định cơ bản c
 ### #4: Silent Error Handling
 - Files: các file trong `internal/` (rclone.go, mount.go, connection.go)
 
-- [ ] Task 4.1: Soát tất cả `if err != nil { log... }` không return
-- [ ] Task 4.2: Sửa thành `return fmt.Errorf("context: %w", err)` — propagate error lên trên
-- [ ] Task 4.3: Đảm bảo CLI layer hiển thị lỗi rõ ràng cho người dùng
-- [ ] Task 4.4: Viết test verify tất cả errors propagate đúng
+- [x] Task 4.1: Soát tất cả `if err != nil { log... }` không return
+  - Chi tiết: Phát hiện 16 vị trí silent error trong internal/ và cmd/
+- [x] Task 4.2: Sửa thành `return fmt.Errorf("context: %w", err)` — propagate error lên trên
+  - Chi tiết: Fix 5 files (rclone.go, ide.go, mount.go, unmount.go, open.go)
+- [x] Task 4.3: Đảm bảo CLI layer hiển thị lỗi rõ ràng cho người dùng
+  - Chi tiết: `RunE` return errors được cobra display ra stderr + os.Exit(1)
+- [x] Task 4.4: Viết test verify tất cả errors propagate đúng
+  - Chi tiết: 10 tests mới (3 ide + 7 cmd)
 
 ### #5: mount.go Complexity
 - File: `cmd/mount.go`

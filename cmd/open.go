@@ -34,7 +34,10 @@ var openCmd = &cobra.Command{
 			return fmt.Errorf("no active tunnels — run mount first")
 		}
 
-		allCs, _ := codespace.List()
+		allCs, err := codespace.List()
+		if err != nil {
+			return fmt.Errorf("listing codespaces: %w", err)
+		}
 		csRepo := map[string]string{}
 		for _, cs := range allCs {
 			csRepo[cs.Name] = cs.Repository
