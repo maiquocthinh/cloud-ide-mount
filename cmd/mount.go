@@ -541,4 +541,3 @@ func waitForMount(drive string, mp *rclone.MountProcess) bool {
 	}
 	return false
 }
-
