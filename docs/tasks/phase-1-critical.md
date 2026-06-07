@@ -18,13 +18,13 @@ Sửa 5 bug critical + thêm logging để đảm bảo ổn định cơ bản c
   - Ghi chú: Dùng `CLOUD_IDE_MOUNT_ROOT` env var hoặc thư mục executable
 
 ### #2: Process Kill Không Atomic
-- File: `internal/tunnel/ssh.go`
+- File: `internal/tunnel/ssh.go`, `cmd/unmount.go`, `cmd/mount.go`
 
-- [ ] Task 2.1: Thay `time.Sleep()` bằng `process.Wait()`
+- [x] Task 2.1: Thay `time.Sleep()` bằng `process.Wait()`
   - Chi tiết: Đợi process exit thực sự, không sleep cứng
-- [ ] Task 2.2: Xử lý timeout nếu process không chịu exit
+- [x] Task 2.2: Xử lý timeout nếu process không chịu exit
   - Chi tiết: `Wait()` với timeout + `SIGKILL` nếu quá lâu
-- [ ] Task 2.3: Viết test kill + verify process đã exit
+- [x] Task 2.3: Viết test kill + verify process đã exit
 
 ### #3: Port Allocation TOCTOU
 - File: `internal/tunnel/port.go`

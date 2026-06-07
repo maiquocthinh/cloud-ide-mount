@@ -18,3 +18,21 @@
 
 ### Blocker / Ghi chú
 - Không có blocker. Bắt đầu với Issue #1.
+
+## 2026-06-07 (tiếp)
+
+### Làm
+- [x] #2.1: Tạo `internal/executil/process.go` — `KillProcess(pid, timeout)` with Wait + timeout
+- [x] #2.2: Xoá `killPid()` trong `cmd/unmount.go` — chuyển sang `executil.KillProcess()`
+- [x] #2.3: Thay 3 chỗ `killPid()` + `time.Sleep()` trong `cmd/mount.go` bằng `executil.KillProcess()`
+- [x] #2.4: Viết test `TestKillProcess` + `TestKillProcessNonExistent` trong `internal/executil/process_test.go`
+
+### Kết quả
+- Build: ✅ pass
+- Test: ✅ `go test -race -v ./...` — 9/9 pass, không race
+- Vet: ✅ `go vet ./...` — clean
+
+### Ghi chú
+- `killPid()` đã được xoá khỏi `cmd/unmount.go`. Không còn `time.Sleep(time.Second)` sau kill.
+- Cơ chế mới: Kill → Wait(timeout) → báo lỗi nếu process không exit.
+- Issue #2 done. Tiếp theo: Issue #3 (Port allocation TOCTOU).

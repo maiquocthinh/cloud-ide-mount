@@ -2,10 +2,11 @@ package cmd
 
 import (
 	"fmt"
-	"os"
 	"os/exec"
 	"strings"
+	"time"
 
+	"cloud-ide-mount/internal/executil"
 	"cloud-ide-mount/internal/rclone"
 	"cloud-ide-mount/internal/state"
 	"cloud-ide-mount/internal/ui"
@@ -51,7 +52,9 @@ var unmountCmd = &cobra.Command{
 		for _, m := range toUnmount {
 			unmountedDrives[m.Drive] = true
 			fmt.Printf("  Stopping rclone: %s (PID %d)\n", m.Drive, m.RclonePid)
-			killPid(m.RclonePid)
+			if err := executil.KillProcess(m.RclonePid, 5*time.Second); err != nil {
+				fmt.Printf("  Warning: error stopping rclone PID %d: %v\n", m.RclonePid, err)
+			}
 		}
 
 		var remainingMounts []state.Mount
@@ -84,7 +87,9 @@ var unmountCmd = &cobra.Command{
 			}
 			if r.TunnelPid > 0 {
 				fmt.Printf("  Stopping tunnel: %s (PID %d)\n", r.Codespace, r.TunnelPid)
-				killPid(r.TunnelPid)
+				if err := executil.KillProcess(r.TunnelPid, 5*time.Second); err != nil {
+					fmt.Printf("  Warning: error stopping tunnel PID %d: %v\n", r.TunnelPid, err)
+				}
 			}
 			killPortListeners(r.Port)
 			rclone.DeleteRemote(r.Name)
@@ -120,13 +125,6 @@ func init() {
 	unmountCmd.Flags().BoolVarP(&stopFlag, "stop", "s", false, "Stop codespace(s) after unmounting")
 }
 
-func killPid(pid int) {
-	p, err := os.FindProcess(pid)
-	if err == nil {
-		p.Kill()
-	}
-}
-
 func killPortListeners(port int) {
 	out, err := exec.Command("powershell", "-c",
 		fmt.Sprintf(`Get-NetTCPConnection -LocalPort %d -State Listen -ErrorAction SilentlyContinue | ForEach-Object { $_.OwningProcess }`, port),
@@ -141,6 +139,8 @@ func killPortListeners(port int) {
 	var pid int
 	fmt.Sscanf(pidStr, "%d", &pid)
 	if pid > 0 {
-		killPid(pid)
+		if err := executil.KillProcess(pid, 5*time.Second); err != nil {
+			fmt.Printf("  Warning: error killing port listener PID %d: %v\n", pid, err)
+		}
 	}
 }
