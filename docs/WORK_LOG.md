@@ -10,7 +10,7 @@ Hub này liệt kê các phase đã/sẽ ghi log và link đến file log chi ti
 
 ## Phase Đã Hoàn Thành
 
-*(chưa có)*
+- Phase 0: Thiết Lập → [logs/phase-0-setup.md](./logs/phase-0-setup.md)
 
 ---
 
