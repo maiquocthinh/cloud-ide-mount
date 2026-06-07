@@ -1,0 +1,50 @@
+# Refer to golangci-lint style guide: https://golangci-lint.run/usage/configuration/
+run:
+  timeout: 5m
+  tests: true
+  build-tags: []
+
+linters:
+  enable:
+    - errcheck
+    - gosimple
+    - govet
+    - ineffassign
+    - staticcheck
+    - unused
+    - misspell
+    - gofmt
+    - goimports
+    - unconvert
+    - unparam
+  disable:
+    - typecheck
+
+linters-settings:
+  errcheck:
+    check-type-assertions: true
+    check-blank: false
+  gofmt:
+    simplify: true
+  goimports:
+    local-prefixes: cloud-ide-mount
+  misspell:
+    locale: US
+  staticcheck:
+    checks:
+      - all
+      - -SA1019
+  unparam:
+    check-exported: false
+
+issues:
+  exclude-rules:
+    - path: _test\.go
+      linters:
+        - errcheck
+        - gosimple
+  max-issues-per-linter: 0
+  max-same-issues: 0
+  exclude:
+    - "should have comment"
+    - "comment on exported"
