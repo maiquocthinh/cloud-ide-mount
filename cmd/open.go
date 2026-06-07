@@ -8,6 +8,7 @@ import (
 	"strings"
 
 	"cloud-ide-mount/internal/codespace"
+	"cloud-ide-mount/internal/logging"
 	"cloud-ide-mount/internal/ide"
 	"cloud-ide-mount/internal/state"
 
@@ -106,7 +107,7 @@ var openCmd = &cobra.Command{
 			RemotePath: ent.RemotePath,
 		}
 
-		fmt.Printf("  Opening %s via SSH with %s...\n", ent.Codespace, selected.Name)
+		logging.Info(fmt.Sprintf("Opening %s via SSH with %s...", ent.Codespace, selected.Name), "codespace", ent.Codespace, "ide", selected.Name)
 		return ide.Open(selected, info)
 	},
 }

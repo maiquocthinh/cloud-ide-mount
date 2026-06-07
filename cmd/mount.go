@@ -10,6 +10,7 @@ import (
 
 	"cloud-ide-mount/internal/codespace"
 	"cloud-ide-mount/internal/executil"
+	"cloud-ide-mount/internal/logging"
 	"cloud-ide-mount/internal/rclone"
 	"cloud-ide-mount/internal/state"
 	"cloud-ide-mount/internal/tunnel"
@@ -92,7 +93,7 @@ func mountRunE(_ *cobra.Command, _ []string) error {
 		return fmt.Errorf("saving state: %w", err)
 	}
 	fmt.Println()
-	fmt.Println("  Done. Run status to verify.")
+	logging.Info("Done. Run status to verify.")
 	return nil
 }
 
@@ -109,7 +110,7 @@ func startCodespaces(selected []codespace.Codespace) error {
 		if cs.State == "Available" {
 			continue
 		}
-		fmt.Printf("  Starting codespace: %s...\n", cs.Name)
+		logging.Info(fmt.Sprintf("Starting codespace: %s...", cs.Name), "codespace", cs.Name)
 		if _, err := execCmdOutput("gh", "cs", "start", "-c", cs.Name); err != nil {
 			return fmt.Errorf("starting codespace %s: %w", cs.Name, err)
 		}
@@ -119,7 +120,7 @@ func startCodespaces(selected []codespace.Codespace) error {
 				stateStr := strings.TrimSpace(out)
 				stateStr = strings.Trim(stateStr, `"`)
 				if stateStr == "Available" {
-					fmt.Printf("  %s is now Available.\n", cs.Name)
+					logging.Info(fmt.Sprintf("%s is now Available.", cs.Name), "codespace", cs.Name)
 					break
 				}
 			}
@@ -136,7 +137,7 @@ func filterAvailable(selected []codespace.Codespace) []codespace.Codespace {
 		if cs.State == "Available" {
 			available = append(available, cs)
 		} else {
-			fmt.Printf("  Skipping %s (%s)\n", cs.Name, cs.State)
+			logging.Warn(fmt.Sprintf("Skipping %s (%s)", cs.Name, cs.State), "codespace", cs.Name, "state", cs.State)
 		}
 	}
 	return available
@@ -199,7 +200,7 @@ func orchestrateTunnels(available []codespace.Codespace, s *state.State, startPo
 			}
 		}
 		if existingRemote != nil {
-			fmt.Printf("  Tunnel already active: %s (port %d)\n", name, existingRemote.Port)
+			logging.Info(fmt.Sprintf("Tunnel already active: %s (port %d)", name, existingRemote.Port), "codespace", name, "port", existingRemote.Port)
 			folderPath := findFolderPath(csPathMap, name)
 			upstreams = append(upstreams, rclone.Upstream{FolderPath: folderPath, Remote: remoteName})
 			continue
@@ -211,17 +212,17 @@ func orchestrateTunnels(available []codespace.Codespace, s *state.State, startPo
 		}
 		allocPort := ap.Port
 
-		fmt.Printf("  Starting sshd: %s...\n", name)
+		logging.Info(fmt.Sprintf("Starting sshd: %s...", name), "codespace", name)
 		if _, err := execCmdOutput("gh", "cs", "ssh", "-c", name, "--", "sudo", "service", "ssh", "start"); err != nil {
-			fmt.Printf("  Warning: sshd start may have failed: %v (continuing)\n", err)
+			logging.Warn(fmt.Sprintf("sshd start may have failed: %v (continuing)", err), "codespace", name, "error", err)
 		}
 
 		sshPort := detectSSHPort(name)
-		fmt.Printf("  SSH port: %d\n", sshPort)
+		logging.Info(fmt.Sprintf("SSH port: %d", sshPort), "codespace", name, "sshPort", sshPort)
 
-		fmt.Printf("  Starting tunnel: %s → local %d\n", name, allocPort)
+		logging.Info(fmt.Sprintf("Starting tunnel: %s -> local %d", name, allocPort), "codespace", name, "port", allocPort)
 		if err := ap.Close(); err != nil {
-			fmt.Printf("  Warning: error releasing temporary port %d: %v\n", allocPort, err)
+			logging.Warn(fmt.Sprintf("error releasing temporary port: %v", err), "port", allocPort, "error", err)
 		}
 		tunCmd, err := tunnel.StartTunnel(name, allocPort, sshPort)
 		if err != nil {
@@ -230,20 +231,20 @@ func orchestrateTunnels(available []codespace.Codespace, s *state.State, startPo
 
 		ready := tunnel.WaitPort(allocPort, 30*time.Second)
 		if !ready {
-			fmt.Printf("  Tunnel failed: %s\n", name)
+			logging.Error(fmt.Sprintf("Tunnel failed: %s", name), "codespace", name)
 			if tunCmd.Process != nil {
 				if err := tunCmd.Process.Kill(); err != nil {
-					fmt.Printf("  Warning: error killing failed tunnel: %v\n", err)
+					logging.Warn(fmt.Sprintf("error killing failed tunnel: %v", err), "error", err)
 				}
 			}
 			if err := ap.Close(); err != nil {
-				fmt.Printf("  Warning: error releasing failed port: %v\n", err)
+				logging.Warn(fmt.Sprintf("error releasing failed port: %v", err), "error", err)
 			}
 			port++
 			continue
 		}
 
-		fmt.Printf("  Tunnel ready: %s\n", name)
+		logging.Info(fmt.Sprintf("Tunnel ready: %s", name), "codespace", name)
 
 		if err := rclone.NewSFTPRemote(remoteName, allocPort, keyFile); err != nil {
 			return nil, fmt.Errorf("creating rclone remote for %s: %w", name, err)
@@ -261,7 +262,7 @@ func orchestrateTunnels(available []codespace.Codespace, s *state.State, startPo
 		upstreams = append(upstreams, rclone.Upstream{FolderPath: folderPath, Remote: remoteName})
 
 		if err := ap.Close(); err != nil {
-			fmt.Printf("  Warning: error releasing port %d: %v\n", allocPort, err)
+			logging.Warn(fmt.Sprintf("error releasing port: %v", err), "port", allocPort, "error", err)
 		}
 		port = allocPort + 1
 	}
@@ -295,12 +296,12 @@ func mountCombined(di ui.DriveAssignment, upstreams []rclone.Upstream, s *state.
 		stopExistingMount(drive, s)
 	}
 
-	fmt.Println("  Building combine remote...")
+	logging.Info("Building combine remote...")
 	if err := buildConfig(CombineRemote, upstreams); err != nil {
 		return fmt.Errorf("building combine remote: %w", err)
 	}
 
-	fmt.Printf("  Mounting %s: → %s\n", CombineRemote, drive)
+	logging.Info(fmt.Sprintf("Mounting %s -> %s", CombineRemote, drive), "remote", CombineRemote, "drive", drive)
 	mp, err := rclone.Mount(CombineRemote, drive, "Codespaces")
 	if err != nil {
 		return fmt.Errorf("mounting %s: %w", drive, err)
@@ -314,9 +315,9 @@ func mountCombined(di ui.DriveAssignment, upstreams []rclone.Upstream, s *state.
 	})
 
 	if waitForMount(drive, mp) {
-		fmt.Printf("  Mounted: %s\n", drive)
+		logging.Info(fmt.Sprintf("Mounted: %s", drive), "drive", drive)
 	} else {
-		fmt.Printf("  %s not visible after 15s. Run status to check.\n", drive)
+		logging.Warn(fmt.Sprintf("%s not visible after 15s. Run status to check.", drive), "drive", drive)
 	}
 
 	return nil
@@ -361,15 +362,15 @@ func mountMultipleOnDrive(drive string, csNames []string, upstreams []rclone.Ups
 
 	stopExistingMount(drive, s)
 
-	fmt.Printf("  Building combine remote for %s...\n", drive)
+	logging.Info(fmt.Sprintf("Building combine remote for %s...", drive), "drive", drive)
 	if err := buildConfig(CombineRemote, sharedUpstreams); err != nil {
-		fmt.Printf("  Combine remote error: %v (skipping %s)\n", err, drive)
+		logging.Error(fmt.Sprintf("Combine remote error: %v (skipping %s)", err, drive), "error", err, "drive", drive)
 		return
 	}
 
 	mp, err := rclone.Mount(CombineRemote, drive, "Codespaces")
 	if err != nil {
-		fmt.Printf("  Mount error for %s: %v\n", drive, err)
+		logging.Error(fmt.Sprintf("Mount error for %s: %v", drive, err), "drive", drive, "error", err)
 		return
 	}
 	s.Mounts = append(s.Mounts, state.Mount{
@@ -380,9 +381,9 @@ func mountMultipleOnDrive(drive string, csNames []string, upstreams []rclone.Ups
 	})
 
 	if waitForMount(drive, mp) {
-		fmt.Printf("  Mounted: %s  (combined)\n", drive)
+		logging.Info(fmt.Sprintf("Mounted: %s (combined)", drive), "drive", drive)
 	} else {
-		fmt.Printf("  %s not visible after 15s.\n", drive)
+		logging.Warn(fmt.Sprintf("%s not visible after 15s.", drive), "drive", drive)
 	}
 }
 
@@ -416,23 +417,23 @@ func mountSingleOnDrive(drive, csName string, upstreams []rclone.Upstream, s *st
 	}
 
 	if len(allUpstreams) == 0 {
-		fmt.Printf("  No remote for %s, skipping.\n", csName)
+		logging.Warn(fmt.Sprintf("No remote for %s, skipping.", csName), "codespace", csName)
 		return
 	}
 
 	stopExistingMount(drive, s)
 
-	fmt.Printf("  Building combine remote for %s...\n", drive)
+	logging.Info(fmt.Sprintf("Building combine remote for %s...", drive), "drive", drive)
 	if err := buildConfig(CombineRemote, allUpstreams); err != nil {
-		fmt.Printf("  Combine remote error: %v (skipping %s)\n", err, drive)
+		logging.Error(fmt.Sprintf("Combine remote error: %v (skipping %s)", err, drive), "error", err, "drive", drive)
 		return
 	}
 
-	fmt.Printf("  Mounting %s → %s\n", csName, drive)
+	logging.Info(fmt.Sprintf("Mounting %s -> %s", csName, drive), "codespace", csName, "drive", drive)
 	volname := strings.TrimRight(drive, ":")
 	mp, err := rclone.Mount(CombineRemote, drive, volname)
 	if err != nil {
-		fmt.Printf("  Mount error for %s: %v\n", drive, err)
+		logging.Error(fmt.Sprintf("Mount error for %s: %v", drive, err), "drive", drive, "error", err)
 		return
 	}
 
@@ -449,9 +450,9 @@ func mountSingleOnDrive(drive, csName string, upstreams []rclone.Upstream, s *st
 	})
 
 	if waitForMount(drive, mp) {
-		fmt.Printf("  Mounted: %s  (%s)\n", drive, csName)
+		logging.Info(fmt.Sprintf("Mounted: %s (%s)", drive, csName), "drive", drive, "codespace", csName)
 	} else {
-		fmt.Printf("  rclone running but %s not visible yet.\n", drive)
+		logging.Warn(fmt.Sprintf("rclone running but %s not visible yet.", drive), "drive", drive)
 	}
 }
 
@@ -459,9 +460,9 @@ func mountSingleOnDrive(drive, csName string, upstreams []rclone.Upstream, s *st
 func stopExistingMount(drive string, s *state.State) {
 	for i, m := range s.Mounts {
 		if m.Drive == drive {
-			fmt.Printf("  Stopping rclone on %s to rebuild combine...\n", drive)
+			logging.Info(fmt.Sprintf("Stopping rclone on %s to rebuild combine...", drive), "drive", drive)
 			if err := executil.KillProcess(m.RclonePid, 5*time.Second); err != nil {
-				fmt.Printf("  Warning: error stopping rclone PID %d: %v\n", m.RclonePid, err)
+				logging.Warn(fmt.Sprintf("error stopping rclone PID %d: %v", m.RclonePid, err), "pid", m.RclonePid, "error", err)
 			}
 			s.Mounts = append(s.Mounts[:i], s.Mounts[i+1:]...)
 			break
@@ -512,9 +513,9 @@ func waitForMount(drive string, mp *rclone.MountProcess) bool {
 			default:
 			}
 			if stderr != "" {
-				fmt.Printf("  rclone exited: %v\n  stderr: %s\n", err, stderr)
+				logging.Warn(fmt.Sprintf("rclone exited: %v (stderr: %s)", err, stderr), "error", err)
 			} else if err != nil {
-				fmt.Printf("  rclone exited: %v\n", err)
+				logging.Warn(fmt.Sprintf("rclone exited: %v", err), "error", err)
 			}
 			return false
 		default:
@@ -533,9 +534,9 @@ func waitForMount(drive string, mp *rclone.MountProcess) bool {
 		default:
 		}
 		if stderr != "" {
-			fmt.Printf("  rclone exited: %v\n  stderr: %s\n", err, stderr)
+			logging.Warn(fmt.Sprintf("rclone exited: %v (stderr: %s)", err, stderr), "error", err)
 		} else if err != nil {
-			fmt.Printf("  rclone exited: %v\n", err)
+			logging.Warn(fmt.Sprintf("rclone exited: %v", err), "error", err)
 		}
 	default:
 	}

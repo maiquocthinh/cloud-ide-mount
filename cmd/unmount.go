@@ -7,6 +7,7 @@ import (
 	"time"
 
 	"cloud-ide-mount/internal/executil"
+	"cloud-ide-mount/internal/logging"
 	"cloud-ide-mount/internal/rclone"
 	"cloud-ide-mount/internal/state"
 	"cloud-ide-mount/internal/ui"
@@ -25,13 +26,13 @@ var unmountCmd = &cobra.Command{
 			return err
 		}
 		if s == nil || len(s.Mounts) == 0 {
-			fmt.Println("No active mounts found.")
+			logging.Info("No active mounts found.")
 			return nil
 		}
 
 		toUnmount := ui.SelectMountsToUnmount(s.Mounts)
 		if len(toUnmount) == 0 {
-			fmt.Println("Nothing selected.")
+			logging.Info("Nothing selected.")
 			return nil
 		}
 
@@ -41,7 +42,7 @@ var unmountCmd = &cobra.Command{
 				labels = append(labels, m.Drive)
 			}
 			if !ui.Confirm(fmt.Sprintf("Unmount %s? [y/N]", strings.Join(labels, ", "))) {
-				fmt.Println("Canceled.")
+				logging.Info("Canceled.")
 				return nil
 			}
 		}
@@ -51,9 +52,9 @@ var unmountCmd = &cobra.Command{
 		unmountedDrives := map[string]bool{}
 		for _, m := range toUnmount {
 			unmountedDrives[m.Drive] = true
-			fmt.Printf("  Stopping rclone: %s (PID %d)\n", m.Drive, m.RclonePid)
+			logging.Info(fmt.Sprintf("Stopping rclone: %s (PID %d)", m.Drive, m.RclonePid), "drive", m.Drive, "pid", m.RclonePid)
 			if err := executil.KillProcess(m.RclonePid, 5*time.Second); err != nil {
-				fmt.Printf("  Warning: error stopping rclone PID %d: %v\n", m.RclonePid, err)
+				logging.Warn(fmt.Sprintf("error stopping rclone PID %d: %v", m.RclonePid, err), "pid", m.RclonePid, "error", err)
 			}
 		}
 
@@ -86,26 +87,26 @@ var unmountCmd = &cobra.Command{
 				continue
 			}
 			if r.TunnelPid > 0 {
-				fmt.Printf("  Stopping tunnel: %s (PID %d)\n", r.Codespace, r.TunnelPid)
+				logging.Info(fmt.Sprintf("Stopping tunnel: %s (PID %d)", r.Codespace, r.TunnelPid), "codespace", r.Codespace, "pid", r.TunnelPid)
 				if err := executil.KillProcess(r.TunnelPid, 5*time.Second); err != nil {
-					fmt.Printf("  Warning: error stopping tunnel PID %d: %v\n", r.TunnelPid, err)
+					logging.Warn(fmt.Sprintf("error stopping tunnel PID %d: %v", r.TunnelPid, err), "pid", r.TunnelPid, "error", err)
 				}
 			}
 			killPortListeners(r.Port)
 			if err := rclone.DeleteRemote(r.Name); err != nil {
-				fmt.Printf("  Warning: deleting remote %s: %v\n", r.Name, err)
+				logging.Warn(fmt.Sprintf("error deleting remote %s: %v", r.Name, err), "remote", r.Name, "error", err)
 			}
 		}
 
 		if len(remainingMounts) == 0 {
 			if err := rclone.DeleteRemote(CombineRemote); err != nil {
-				fmt.Printf("  Warning: deleting combine remote %s: %v\n", CombineRemote, err)
+				logging.Warn(fmt.Sprintf("error deleting combine remote %s: %v", CombineRemote, err), "remote", CombineRemote, "error", err)
 			}
 			if err := s.Remove(); err != nil {
 				return fmt.Errorf("clearing state file: %w", err)
 			}
 			fmt.Println()
-			fmt.Println("  All unmounted. State cleared.")
+			logging.Info("All unmounted. State cleared.")
 		} else {
 			s.Remotes = remainingRemotes
 			s.Mounts = remainingMounts
@@ -113,12 +114,12 @@ var unmountCmd = &cobra.Command{
 				return fmt.Errorf("saving state after unmount: %w", err)
 			}
 			fmt.Println()
-			fmt.Printf("  Unmounted. %d drive(s) still active.\n", len(remainingMounts))
+			logging.Info(fmt.Sprintf("Unmounted. %d drive(s) still active.", len(remainingMounts)), "activeMounts", len(remainingMounts))
 		}
 
 		if stopFlag && len(codespacesToStop) > 0 {
 			for _, name := range codespacesToStop {
-				fmt.Printf("  Stopping codespace: %s...\n", name)
+				logging.Info(fmt.Sprintf("Stopping codespace: %s...", name), "codespace", name)
 				execCmdOutput("gh", "cs", "stop", "-c", name)
 			}
 			fmt.Println()
@@ -148,7 +149,7 @@ func killPortListeners(port int) {
 	fmt.Sscanf(pidStr, "%d", &pid)
 	if pid > 0 {
 		if err := executil.KillProcess(pid, 5*time.Second); err != nil {
-			fmt.Printf("  Warning: error killing port listener PID %d: %v\n", pid, err)
+			logging.Warn(fmt.Sprintf("error killing port listener PID %d: %v", pid, err), "pid", pid, "error", err)
 		}
 	}
 }
