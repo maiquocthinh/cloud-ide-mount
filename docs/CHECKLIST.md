@@ -1,7 +1,7 @@
 # Bảng Theo Dõi Dự Án
 
 **Tổng:** 24 hạng mục · 🔴 5 Critical · 🟡 3 High · 🔵 16 Normal
-**Tiến độ:** ▰▰▰▰▰▰▰▰▰▰▰▰ 25% (6/24)
+**Tiến độ:** ▰▰▰▰▰▰▰▰▰▰▰ 38% (9/24)
 
 ---
 
@@ -22,7 +22,7 @@
 | 2 | Process kill không atomic | Bug | ✅ | [tasks](./tasks/phase-1-critical.md#2-process-kill-không-atomic) |
 | 3 | Port allocation TOCTOU | Bug | ✅ | [tasks](./tasks/phase-1-critical.md#3-port-allocation-toctou) |
 | 4 | Silent error handling | Bug | ✅ | [tasks](./tasks/phase-1-critical.md#4-silent-error-handling) |
-| 5 | mount.go complexity | Refactor | ⬜ | — |
+| 5 | mount.go complexity | Refactor | ✅ | — |
 | 6 | Logging | Feature | ⬜ | — |
 
 ## ⬜ Phase 2: High — v0.2
@@ -51,8 +51,8 @@
 ## ✅ Tiêu Chí Hoàn Thành
 
 **v0.1:**
-- [ ] 5 bug critical đã sửa
-- [ ] Tất cả test pass
+- [x] 5 bug critical đã sửa
+- [x] Tất cả test pass
 - [ ] Logging hoạt động
 
 **v1.0:**
