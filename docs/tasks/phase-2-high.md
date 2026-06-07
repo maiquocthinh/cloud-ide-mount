@@ -29,9 +29,26 @@ Giải quyết các issue High priority sau khi hoàn thành Phase 1 (Critical).
   - phase-2-high.md — task tracking (file này)
 
 ### 8. SSH port detection không ổn định
-- [ ] Chưa bắt đầu
-  - File: `internal/tunnel/tunnel.go` (`detectSSHPort` shadowing)
-  - Ghi chú: ...
+- [x] #8.1: Refactor `detectSSHPort` → `tunnel.DetectSSHPort` with retry + better parsing
+  - Move from `cmd/mount.go` to `internal/tunnel/tunnel.go`
+  - Remove sudo dependency (use `cat` instead of `sudo grep`)
+  - Add 3 retry attempts with 1s backoff
+  - Parse sshd_config correctly (skip comments, case-insensitive, validate range)
+  - Use function var (`execSSHCommand`) for mockability in tests
+- [x] #8.2: Remove dead code `GetCsSshPort` from `internal/tunnel/tunnel.go`
+  - Dead function with wrong logic (probing port 22 after tunnel established)
+  - Shadowing issue (err variable shadowed in inner scope)
+- [x] #8.3: Tạo `internal/tunnel/sshport_test.go` — 13 tests
+  - 10 parseSSHPort tests (default, custom, commented, empty, invalid, out-of-range, multiple, case, whitespace)
+  - 3 DetectSSHPort tests (success first try, retry on failure, all fail→default, sudo fallback)
+- [x] #8.4: Update docs
+  - CHECKLIST.md — đánh dấu item 8 là ✅ (11/24 = 46%)
+  - phase-2-high.md — task tracking (file này)
+  - logs/phase-2-high.md — log file
+- [x] #8.5: Clean up cmd/mount.go
+  - Remove `detectSSHPort` function
+  - Remove unused `strconv` import
+  - Remove `TestDetectSSHPort_DefaultOnError` from mount_test.go
 
 ### 9. Per-user state profiles
 - [ ] Chưa bắt đầu
