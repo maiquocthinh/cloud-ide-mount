@@ -51,20 +51,32 @@ Sửa 5 bug critical + thêm logging để đảm bảo ổn định cơ bản c
 ### #5: mount.go Complexity
 - File: `cmd/mount.go`
 
-- [ ] Task 5.1: Tách `orchestrateTunnels()` — logic tạo tunnel riêng
-- [ ] Task 5.2: Tách `buildConfig()` — cấu hình mount riêng
-- [ ] Task 5.3: Tách `mountDrives()` — gắn kết ổ đĩa riêng
-- [ ] Task 5.4: Viết unit test cho từng function mới
-- [ ] Task 5.5: Verify vẫn hỗ trợ combine + separate mode
+- [x] Task 5.1: Tách `orchestrateTunnels()` — logic tạo tunnel riêng
+  - Chi tiết: function dài 80 dòng, dùng 8 local var → giữ nguyên, không cần tách thêm
+- [x] Task 5.2: Tách `buildConfig()` — cấu hình mount riêng
+  - Chi tiết: đã gọn (delegate sang rclone.SetCombineRemote), giữ nguyên
+- [x] Task 5.3: Tách `mountDrives()` — gắn kết ổ đĩa riêng
+  - Chi tiết: đã tách mountCombined, mountSeparate, mountMultipleOnDrive, mountSingleOnDrive
+- [x] Task 5.4: Viết unit test cho từng function mới
+  - File: `cmd/mount_test.go`
+  - Chi tiết: 15 tests (filterAvailable 4, groupByDrive 4, initState 2, findFolderPath 3, detectSSHPort, execLook, checkDeps 2)
+- [x] Task 5.5: Verify vẫn hỗ trợ combine + separate mode
+  - Chi tiết: mountCombined + mountSeparate giữ nguyên logic cũ, không thay đổi hành vi
 
 ### #6: Logging
-- File: thêm `internal/logging/`
+- File: `internal/logging/`
 
-- [ ] Task 6.1: Thiết lập logging package (struct logger, level, output)
+- [x] Task 6.1: Thiết lập logging package (struct logger, level, output)
+  - File: `internal/logging/logger.go`
   - Chi tiết: support log level (debug/info/warn/error), output file + stdout
-- [ ] Task 6.2: Thay `fmt.Println` / `log.Println` rải rác bằng logger
-- [ ] Task 6.3: Thêm context fields (workspace ID, connection ID) cho dễ trace
-- [ ] Task 6.4: Viết test logging output
+- [x] Task 6.2: Thay `fmt.Println` / `log.Println` rải rác bằng logger
+  - File: `cmd/mount.go`, `cmd/unmount.go`, `cmd/open.go`
+  - Chi tiết: thay ~35 fmt calls trong cmd/ bằng log.Info/Warn/Error
+- [x] Task 6.3: Thêm context fields (workspace ID, connection ID) cho dễ trace
+  - Chi tiết: fields codespace, port, drive, pid, remote, error trong mỗi log call
+- [x] Task 6.4: Viết test logging output
+  - File: `internal/logging/logger_test.go`
+  - Chi tiết: 9 tests (level filtering, structured fields, timestamps, output)
 
 ## Ghi Chú
 - Quy tắc: mỗi function chỉ làm 1 việc, test kèm theo

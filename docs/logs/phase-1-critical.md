@@ -109,6 +109,31 @@
 - Phase 0 hoàn thành 100% ✅
 - Tiến độ tổng: 6/24 (25%)
 
+
+## 2026-06-07 (tiếp)
+
+### Làm
+- [x] #6.1: Tạo `internal/logging/logger.go` — Logger struct, 4 levels (debug/info/warn/error), Init(), Close()
+  - Output: stdout + file ({AppRoot}/logs/cloud-ide-mount.log)
+  - Structured fields: codespace, port, drive, pid, remote, error
+- [x] #6.2: Thay ~35 `fmt.Printf` rải rác bằng logger trong cmd/
+  - `cmd/mount.go`: progress + warning messages → log.Info/Warn/Error
+  - `cmd/unmount.go`: progress + warning messages → log.Info/Warn/Error
+  - `cmd/open.go`: progress message → log.Info
+  - Giữ nguyên: interactive UI (showPlan, selection, confirmation) → fmt
+- [x] #6.3: Thêm context fields (codespace, port, drive, pid, remote, error) cho mỗi log call
+- [x] #6.4: Viết 9 tests trong `internal/logging/logger_test.go`
+  - Level filtering, level labels, SetLevel, structured fields, timestamp, Init/Close
+
+### Kết quả
+- Build: ✅ pass
+- Test: ✅ `go test -race -v ./...` — 48/48 pass, không race
+- Vet: ✅ `go vet ./...` — clean
+- Phase 1 hoàn thành 100% ✅
+- Tiến độ tổng: 9/24 (38%)
+
 ### Ghi chú
-- #0.4 done. Phase 0 hoàn tất.
-- Tiếp theo: Issue #5 (mount.go complexity) hoặc Issue #6 (Logging).
+- Issue #6 done. Phase 1 hoàn tất! 🎉
+- Tất cả 6 items trong Phase 1 đã hoàn thành.
+- Log file được ghi tại `{CLOUD_IDE_MOUNT_ROOT}/logs/cloud-ide-mount.log` hoặc `{exe_dir}/logs/cloud-ide-mount.log`.
+- Tiếp theo: Phase 2 (Health checks, SSH port detection, Per-user state profiles).

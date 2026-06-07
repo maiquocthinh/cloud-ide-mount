@@ -22,8 +22,8 @@
 | 2 | Process kill không atomic | Bug | ✅ | [tasks](./tasks/phase-1-critical.md#2-process-kill-không-atomic) |
 | 3 | Port allocation TOCTOU | Bug | ✅ | [tasks](./tasks/phase-1-critical.md#3-port-allocation-toctou) |
 | 4 | Silent error handling | Bug | ✅ | [tasks](./tasks/phase-1-critical.md#4-silent-error-handling) |
-| 5 | mount.go complexity | Refactor | ✅ | — |
-| 6 | Logging | Feature | ⬜ | — |
+| 5 | mount.go complexity | Refactor | ✅ | [tasks](./tasks/phase-1-critical.md#5-mountgo-complexity) |
+| 6 | Logging | Feature | ✅ | [tasks](./tasks/phase-1-critical.md#6-logging) |
 
 ## ⬜ Phase 2: High — v0.2
 
