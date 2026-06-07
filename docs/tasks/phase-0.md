@@ -22,6 +22,12 @@ Khởi tạo project structure, docs và CI để làm nền tảng cho các pha
 - [x] Task 0.3.2: Verify CI chạy pass trên push/PR
 
 ### #0.4: Thiết lập môi trường dev (Win/Lin/Mac)
-- [ ] Task 0.4.1: Script setup cho Windows (PowerShell)
-- [ ] Task 0.4.2: Script setup cho Linux/macOS (bash)
-- [ ] Task 0.4.3: Tài liệu hướng dẫn cài đặt dependencies (gh, rclone)
+- [x] Task 0.4.1: Script setup cho Windows (PowerShell) — `scripts/setup.ps1`
+  - Check/install: Go, Git, gh, rclone qua winget
+  - Generate SSH key, hướng dẫn gh auth
+  - Build + test tự động
+- [x] Task 0.4.2: Script setup cho Linux/macOS (bash) — `scripts/setup.sh`
+  - Check/install: Go, Git, gh, rclone qua brew/apt/dnf/pacman
+  - Generate SSH key, hướng dẫn gh auth
+  - Build + test tự động
+- [x] Task 0.4.3: Tài liệu hướng dẫn cài đặt dependencies (gh, rclone)
