@@ -1,7 +1,7 @@
 # Bảng Theo Dõi Dự Án
 
 **Tổng:** 24 hạng mục · 🔴 5 Critical · 🟡 3 High · 🔵 16 Normal
-**Tiến độ:** ▰▰▰▰▰▰▰▰▰▰▰ 21% (5/24)
+**Tiến độ:** ▰▰▰▰▰▰▰▰▰▰▰▰ 25% (6/24)
 
 ---
 
@@ -12,7 +12,7 @@
 | 0.1 | Khởi tạo Go module + cấu trúc project | Setup | ✅ | [tasks](./tasks/phase-0.md#01-khởi-tạo-go-module--cấu-trúc-project) |
 | 0.2 | Tổ chức docs (7 file md) | Docs | ✅ | [tasks](./tasks/phase-0.md#02-tổ-chức-docs-7-file-md) |
 | 0.3 | CI config (GitHub Actions) | Setup | ✅ | [tasks](./tasks/phase-0.md#03-ci-config-github-actions) |
-| 0.4 | Thiết lập môi trường dev (Win/Lin/Mac) | Setup | ⬜ | [tasks](./tasks/phase-0.md#04-thiết-lập-môi-trường-dev-winlinmac) |
+| 0.4 | Thiết lập môi trường dev (Win/Lin/Mac) | Setup | ✅ | [tasks](./tasks/phase-0.md#04-thiết-lập-môi-trường-dev-winlinmac) |
 
 ## ⏳ Phase 1: Critical — v0.1
 

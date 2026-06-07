@@ -90,4 +90,25 @@
 - Coverage mới: 10 tests (3 ide + 7 cmd)
 
 ### Ghi chú
-- Issue #4 done. Tiếp theo: Issue #5 (mount.go complexity).
+## 2026-06-07 (tiếp)
+
+### Làm
+- [x] #0.4.1: Tạo `scripts/setup.ps1` — Windows PowerShell
+  - Check/install: Go, Git, gh (winget), rclone (winget)
+  - SSH key generation + gh auth hướng dẫn
+  - Build + test tự động
+- [x] #0.4.2: Tạo `scripts/setup.sh` — Linux/macOS bash
+  - Auto-detect package manager (brew/apt/dnf/pacman)
+  - Install gh + rclone theo từng platform
+  - SSH key generation + gh auth hướng dẫn
+  - Build + test tự động
+- [x] #0.4.3: Cập nhật phase-0.md tasks — đánh dấu hoàn thành
+
+### Kết quả
+- Scripts: `scripts/setup.ps1` (163 dòng) + `scripts/setup.sh` (185 dòng)
+- Phase 0 hoàn thành 100% ✅
+- Tiến độ tổng: 6/24 (25%)
+
+### Ghi chú
+- #0.4 done. Phase 0 hoàn tất.
+- Tiếp theo: Issue #5 (mount.go complexity) hoặc Issue #6 (Logging).
