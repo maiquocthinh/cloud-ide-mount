@@ -1,7 +1,7 @@
 # Bảng Theo Dõi Dự Án
 
 **Tổng:** 24 hạng mục · 🔴 5 Critical · 🟡 3 High · 🔵 16 Normal
-**Tiến độ:** ▰▰▰▰▰▰▰▰▰▰▰ 21% (5/24)
+**Tiến độ:** ▰▰▰▰▰▰▰▰▰▰▰ 38% (9/24)
 
 ---
 
@@ -12,7 +12,7 @@
 | 0.1 | Khởi tạo Go module + cấu trúc project | Setup | ✅ | [tasks](./tasks/phase-0.md#01-khởi-tạo-go-module--cấu-trúc-project) |
 | 0.2 | Tổ chức docs (7 file md) | Docs | ✅ | [tasks](./tasks/phase-0.md#02-tổ-chức-docs-7-file-md) |
 | 0.3 | CI config (GitHub Actions) | Setup | ✅ | [tasks](./tasks/phase-0.md#03-ci-config-github-actions) |
-| 0.4 | Thiết lập môi trường dev (Win/Lin/Mac) | Setup | ⬜ | [tasks](./tasks/phase-0.md#04-thiết-lập-môi-trường-dev-winlinmac) |
+| 0.4 | Thiết lập môi trường dev (Win/Lin/Mac) | Setup | ✅ | [tasks](./tasks/phase-0.md#04-thiết-lập-môi-trường-dev-winlinmac) |
 
 ## ⏳ Phase 1: Critical — v0.1
 
@@ -22,7 +22,7 @@
 | 2 | Process kill không atomic | Bug | ✅ | [tasks](./tasks/phase-1-critical.md#2-process-kill-không-atomic) |
 | 3 | Port allocation TOCTOU | Bug | ✅ | [tasks](./tasks/phase-1-critical.md#3-port-allocation-toctou) |
 | 4 | Silent error handling | Bug | ✅ | [tasks](./tasks/phase-1-critical.md#4-silent-error-handling) |
-| 5 | mount.go complexity | Refactor | ⬜ | — |
+| 5 | mount.go complexity | Refactor | ✅ | — |
 | 6 | Logging | Feature | ⬜ | — |
 
 ## ⬜ Phase 2: High — v0.2
@@ -51,8 +51,8 @@
 ## ✅ Tiêu Chí Hoàn Thành
 
 **v0.1:**
-- [ ] 5 bug critical đã sửa
-- [ ] Tất cả test pass
+- [x] 5 bug critical đã sửa
+- [x] Tất cả test pass
 - [ ] Logging hoạt động
 
 **v1.0:**
