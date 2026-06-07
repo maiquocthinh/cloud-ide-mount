@@ -27,6 +27,3 @@ go.work
 # OS
 .DS_Store
 Thumbs.db
-
-# Documentation reports (maintained separately)
-docs/report/
