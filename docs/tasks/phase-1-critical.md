@@ -27,12 +27,14 @@ Sửa 5 bug critical + thêm logging để đảm bảo ổn định cơ bản c
 - [x] Task 2.3: Viết test kill + verify process đã exit
 
 ### #3: Port Allocation TOCTOU
-- File: `internal/tunnel/port.go`
+- Files: `internal/tunnel/port.go`, `internal/tunnel/port_test.go`, `cmd/mount.go`
 
-- [ ] Task 3.1: Thay thế check-then-allocate bằng `net.Listen()` atomic
-  - Chi tiết: Listen thành công → port free; fail → port tiếp theo
-- [ ] Task 3.2: Giữ listener mở để tránh race, release khi không dùng
-- [ ] Task 3.3: Viết test concurrent allocation, verify không duplicate port
+- [x] Task 3.1: Thay thế check-then-allocate bằng `net.Listen()` atomic
+  - Chi tiết: `AllocatePort()` dùng `net.Listen()` → Listen thành công → port được giữ; fail → port tiếp theo
+- [x] Task 3.2: Giữ listener mở trong suốt setup (sshd, detect port), release ngay trước `StartTunnel`
+  - Chi tiết: Window TOCTOU giảm từ ~giây (network calls) xuống ~micro-giây (function call)
+- [x] Task 3.3: Viết test concurrent allocation, verify không duplicate port
+  - Chi tiết: 6 tests (basic, busy, release, idempotent, concurrent, large offset)
 
 ### #4: Silent Error Handling
 - Files: các file trong `internal/` (rclone.go, mount.go, connection.go)
