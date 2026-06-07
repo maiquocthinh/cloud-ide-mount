@@ -4,8 +4,8 @@ on:
   push:
     branches: [main, master, develop]
     paths-ignore:
-      - 'docs/**'
-      - '**/*.md'
+      - "docs/**"
+      - "**/*.md"
   pull_request:
     branches: [main, master]
 
@@ -19,7 +19,6 @@ permissions:
   pull-requests: write
 
 jobs:
-
   lint:
     name: Lint
     runs-on: ubuntu-latest
@@ -30,7 +29,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: "1.21"
           cache: true
 
       - name: golangci-lint
@@ -57,7 +56,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: "1.21"
           cache: true
 
       - name: Install dependencies
@@ -117,7 +116,7 @@ jobs:
       - name: Setup Go
         uses: actions/setup-go@v5
         with:
-          go-version: '1.21'
+          go-version: "1.21"
           cache: true
 
       - name: Cross-compile
@@ -128,13 +127,18 @@ jobs:
           arch=${os_arch[1]}
           ext=""
           if [ "$os_name" = "windows" ]; then ext=".exe"; fi
-          GOOS=$os_name GOARCH=$arch go build -v \
+          CGO_ENABLED=0 GOOS=$os_name GOARCH=$arch go build -v \
             -ldflags="-s -w -X main.version=$(git describe --tags 2>/dev/null || echo dev)" \
             -o "dist/cloud-ide-mount-${os_name}-${arch}${ext}" .
+
+      - name: Sanitize artifact name
+        id: sanitize
+        shell: bash
+        run: echo "name=build-$(echo '${{ matrix.target }}' | tr '/' '-')" >> $GITHUB_OUTPUT
 
       - name: Upload build artifacts
         uses: actions/upload-artifact@v4
         with:
-          name: build-${{ matrix.target }}
+          name: ${{ steps.sanitize.outputs.name }}
           path: dist/cloud-ide-mount-*
           retention-days: 7

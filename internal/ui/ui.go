@@ -19,8 +19,8 @@ func readLine() string {
 }
 
 type DriveAssignment struct {
-	Drive  string
-	Extend bool
+	Drive     string
+	Extend    bool
 	Codespace string // empty for combined
 }
 

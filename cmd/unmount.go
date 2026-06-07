@@ -40,7 +40,7 @@ var unmountCmd = &cobra.Command{
 				labels = append(labels, m.Drive)
 			}
 			if !ui.Confirm(fmt.Sprintf("Unmount %s? [y/N]", strings.Join(labels, ", "))) {
-				fmt.Println("Cancelled.")
+				fmt.Println("Canceled.")
 				return nil
 			}
 		}
