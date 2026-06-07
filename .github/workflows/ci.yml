@@ -1,0 +1,140 @@
+name: CI
+
+on:
+  push:
+    branches: [main, master, develop]
+    paths-ignore:
+      - 'docs/**'
+      - '**/*.md'
+  pull_request:
+    branches: [main, master]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+  checks: write
+  pull-requests: write
+
+jobs:
+
+  lint:
+    name: Lint
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: golangci-lint
+        uses: golangci/golangci-lint-action@v6
+        with:
+          version: latest
+          args: --timeout=5m
+          skip-cache: false
+
+      - name: go vet
+        run: go vet ./...
+
+  test:
+    name: Test (${{ matrix.os }})
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: Install dependencies
+        shell: bash
+        run: go mod download
+
+      - name: Build
+        shell: bash
+        run: go build -v -o cloud-ide-mount$(go env GOEXE) .
+
+      - name: Test with race detector
+        shell: bash
+        run: go test -race -v -count=1 ./... 2>&1 | tee test-output.txt
+
+      - name: Upload test results
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-output-${{ matrix.os }}
+          path: test-output.txt
+          retention-days: 7
+
+      - name: Generate coverage
+        if: matrix.os == 'ubuntu-latest'
+        shell: bash
+        run: |
+          go test -race -coverprofile=coverage.out -covermode=atomic ./...
+          go tool cover -func=coverage.out -o coverage.txt
+
+      - name: Upload coverage
+        if: matrix.os == 'ubuntu-latest'
+        uses: actions/upload-artifact@v4
+        with:
+          name: coverage
+          path: |
+            coverage.out
+            coverage.txt
+          retention-days: 30
+
+  build:
+    name: Build (${{ matrix.target }})
+    strategy:
+      fail-fast: false
+      matrix:
+        target:
+          - windows/amd64
+          - windows/386
+          - linux/amd64
+          - linux/arm64
+          - darwin/amd64
+          - darwin/arm64
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Go
+        uses: actions/setup-go@v5
+        with:
+          go-version: '1.21'
+          cache: true
+
+      - name: Cross-compile
+        shell: bash
+        run: |
+          os_arch=(${target//\// })
+          os_name=${os_arch[0]}
+          arch=${os_arch[1]}
+          ext=""
+          if [ "$os_name" = "windows" ]; then ext=".exe"; fi
+          GOOS=$os_name GOARCH=$arch go build -v \
+            -ldflags="-s -w -X main.version=$(git describe --tags 2>/dev/null || echo dev)" \
+            -o "dist/cloud-ide-mount-${os_name}-${arch}${ext}" .
+
+      - name: Upload build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-${{ matrix.target }}
+          path: dist/cloud-ide-mount-*
+          retention-days: 7
