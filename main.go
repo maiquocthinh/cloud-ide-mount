@@ -1,6 +1,6 @@
 package main
 
-import "codespaces-mount/cmd"
+import "cloud-ide-mount/cmd"
 
 func main() {
 	cmd.Execute()

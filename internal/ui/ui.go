@@ -7,8 +7,8 @@ import (
 	"strconv"
 	"strings"
 
-	"codespaces-mount/internal/codespace"
-	"codespaces-mount/internal/state"
+	"cloud-ide-mount/internal/codespace"
+	"cloud-ide-mount/internal/state"
 )
 
 var scanner = bufio.NewScanner(os.Stdin)

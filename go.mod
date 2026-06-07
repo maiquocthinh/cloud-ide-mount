@@ -1,4 +1,4 @@
-module codespaces-mount
+module cloud-ide-mount
 
 go 1.21
 

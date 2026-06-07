@@ -28,7 +28,7 @@ type State struct {
 }
 
 func filePath() string {
-	return filepath.Join(os.TempDir(), "codespaces-mount-state.json")
+	return filepath.Join(os.TempDir(), "cloud-ide-mount-state.json")
 }
 
 func Load() (*State, error) {

@@ -1,29 +1,31 @@
-# cs-mount
+# cloud-ide-mount
 
-Mount GitHub Codespaces as Windows drive letters.
+Mount cloud IDE workspaces as Windows drive letters.
+
+Supported: GitHub Codespaces, Gitpod, and more.
 
 ## Quick Start
 
 ```bash
-# List codespaces
-cs-mount list
+# List cloud IDE workspaces
+cloud-ide-mount list
 
 # Mount (interactive)
-cs-mount mount
+cloud-ide-mount mount
 
 # Unmount
-cs-mount unmount
+cloud-ide-mount unmount
 
 # Status
-cs-mount status
+cloud-ide-mount status
 
 # Open in IDE
-cs-mount open
+cloud-ide-mount open
 ```
 
 ## How it works
 
-1. **List** — Fetch codespaces from GitHub
+1. **List** — Fetch workspaces from cloud IDE provider (GitHub, Gitpod, etc)
 2. **Mount** — Create SSH tunnel → setup rclone SFTP → mount as drive
 3. **Unmount** — Kill processes, cleanup config, update state
 4. **Status** — Check tunnel and mount health
@@ -31,9 +33,9 @@ cs-mount open
 
 ## Requirements
 
-- `gh` — GitHub CLI (authenticated)
+- Cloud IDE CLI — `gh` (GitHub Codespaces) or `gitpod` (Gitpod), etc
 - `rclone` — Must be in PATH
-- SSH key — `~/.ssh/codespaces.auto` (or custom via `--key-file`)
+- SSH key — `~/.ssh/cloud-ide` (or custom via `--key-file`)
 
 ## Flags
 
@@ -42,18 +44,26 @@ cs-mount open
 - `--combine-remote NAME` — rclone combine remote name
 - `-f, --force` — Skip confirmations
 
+## ⚠️ Limitations
+
+**Not production ready.** v0 has 5 critical issues (race conditions, unsafe process management, port allocation, silent failures, complexity). Safe for personal development only.
+
+Currently supports GitHub Codespaces. Gitpod and other cloud IDEs support planned for v1.0+.
+
+See `docs/report/` for detailed analysis.
+
 ## Architecture
 
 ```
 cmd/
-  ├── list.go         List codespaces
+  ├── list.go         List cloud IDE workspaces
   ├── mount.go        Mount orchestration
   ├── unmount.go      Cleanup
   ├── status.go       Health check
   └── open.go         Launch IDE
 
 internal/
-  ├── codespace/      GitHub interaction
+  ├── codespace/      Cloud IDE provider interaction
   ├── tunnel/         SSH tunnel management
   ├── rclone/         rclone config & mount
   ├── state/          Persistent state (JSON)

@@ -3,8 +3,8 @@ package cmd
 import (
 	"fmt"
 
-	"codespaces-mount/internal/codespace"
-	"codespaces-mount/internal/ui"
+	"cloud-ide-mount/internal/codespace"
+	"cloud-ide-mount/internal/ui"
 
 	"github.com/spf13/cobra"
 )

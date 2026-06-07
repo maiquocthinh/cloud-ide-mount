@@ -8,11 +8,11 @@ import (
 	"strings"
 	"time"
 
-	"codespaces-mount/internal/codespace"
-	"codespaces-mount/internal/rclone"
-	"codespaces-mount/internal/state"
-	"codespaces-mount/internal/tunnel"
-	"codespaces-mount/internal/ui"
+	"cloud-ide-mount/internal/codespace"
+	"cloud-ide-mount/internal/rclone"
+	"cloud-ide-mount/internal/state"
+	"cloud-ide-mount/internal/tunnel"
+	"cloud-ide-mount/internal/ui"
 
 	"github.com/spf13/cobra"
 )

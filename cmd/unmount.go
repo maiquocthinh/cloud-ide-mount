@@ -6,9 +6,9 @@ import (
 	"os/exec"
 	"strings"
 
-	"codespaces-mount/internal/rclone"
-	"codespaces-mount/internal/state"
-	"codespaces-mount/internal/ui"
+	"cloud-ide-mount/internal/rclone"
+	"cloud-ide-mount/internal/state"
+	"cloud-ide-mount/internal/ui"
 
 	"github.com/spf13/cobra"
 )

@@ -7,9 +7,9 @@ import (
 	"strconv"
 	"strings"
 
-	"codespaces-mount/internal/codespace"
-	"codespaces-mount/internal/ide"
-	"codespaces-mount/internal/state"
+	"cloud-ide-mount/internal/codespace"
+	"cloud-ide-mount/internal/ide"
+	"cloud-ide-mount/internal/state"
 
 	"github.com/spf13/cobra"
 )

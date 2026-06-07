@@ -4,8 +4,8 @@ import (
 	"fmt"
 	"os"
 
-	"codespaces-mount/internal/state"
-	"codespaces-mount/internal/tunnel"
+	"cloud-ide-mount/internal/state"
+	"cloud-ide-mount/internal/tunnel"
 
 	"github.com/spf13/cobra"
 )
