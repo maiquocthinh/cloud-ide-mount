@@ -9,7 +9,25 @@ import (
 )
 
 // fileMu serializes file I/O to prevent races on the shared state file.
-var fileMu sync.Mutex
+var (
+	fileMu         sync.Mutex
+	currentProfile = "default"
+)
+
+// SetProfile sets the profile name for state file isolation.
+// Load, Save, and Remove use this profile to determine the state file path.
+// Must be called before any Load/Save/Remove call.
+func SetProfile(name string) {
+	if name == "" {
+		name = "default"
+	}
+	currentProfile = name
+}
+
+// Profile returns the current profile name.
+func Profile() string {
+	return currentProfile
+}
 
 // State represents the persisted application state.
 type State struct {
@@ -48,7 +66,7 @@ func appRoot() string {
 }
 
 func filePath() string {
-	return filepath.Join(appRoot(), "config", "state.json")
+	return filepath.Join(appRoot(), "config", "state-"+currentProfile+".json")
 }
 
 // Load reads state from disk. Returns an empty State if the file does not exist.

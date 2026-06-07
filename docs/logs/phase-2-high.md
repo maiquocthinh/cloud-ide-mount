@@ -60,3 +60,34 @@
 - `DetectSSHPort` thử `cat` trước (ko cần sudo), fallback `sudo cat` nếu lỗi, default 22
 - `execSSHCommand` pattern giúp test dễ dàng (mock exec output)
 - Tiếp theo: Issue #9 (Per-user state profiles).
+
+## 2026-06-08
+
+### Làm
+- [x] #9.1: Add profile isolation to state package
+  - `SetProfile(name string)` — set profile before Load, Save, Remove
+  - `Profile()` — get current profile name
+  - `filePath()` — now returns `config/state-{profile}.json`
+  - Default profile: "default"
+- [x] #9.2: Add `--profile` / `-p` flag to root command
+  - Resolution priority: CLI flag → `CLOUD_IDE_MOUNT_PROFILE` env var → OS username → "default"
+  - Sanitize OS username (replace `\` with `_` for `DOMAIN\\User`)
+  - `PersistentPreRunE` hook on rootCmd to resolve at startup
+- [x] #9.3: Update state tests for new file naming
+  - All test expectations changed from `state.json` to `state-default.json`
+- [x] #9.4: Update docs
+  - CHECKLIST.md — item 9 ✅ (12/24 = 50%)
+  - tasks/phase-2-high.md — task tracking
+  - logs/phase-2-high.md — log file này
+
+### Kết quả
+- Build: ✅ `go build ./...` pass
+- Test: ✅ `go test -race ./...` — all tests pass (7 state tests updated)
+- Vet: ✅ `go vet ./...` — clean
+
+### Ghi chú
+- Issue #9 (Per-user state profiles) done! 🎉
+- Mỗi user trên cùng máy giờ có state file riêng: `config/state-{username}.json`
+- Backward compatible: feature flag, default profile "default" cho user không có OS username
+- `--profile` flag cho phép override cho testing/CI/CD
+- Phase 2 complete! 3/3 issues done ✅

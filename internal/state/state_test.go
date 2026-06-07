@@ -32,7 +32,7 @@ func TestSaveAndLoad(t *testing.T) {
 	}
 
 	// Verify file exists at the new path
-	expectedPath := filepath.Join(dir, "config", "state.json")
+	expectedPath := filepath.Join(dir, "config", "state-default.json")
 	if _, err := os.Stat(expectedPath); os.IsNotExist(err) {
 		t.Fatalf("state file not created at %s", expectedPath)
 	}
@@ -111,7 +111,7 @@ func TestRemove(t *testing.T) {
 		t.Fatalf("Remove() error: %v", err)
 	}
 
-	if _, err := os.Stat(filepath.Join(dir, "config", "state.json")); !os.IsNotExist(err) {
+	if _, err := os.Stat(filepath.Join(dir, "config", "state-default.json")); !os.IsNotExist(err) {
 		t.Fatal("state file still exists after Remove()")
 	}
 }
@@ -144,7 +144,7 @@ func TestAtomicWriteNoCorruptionOnPartialWrite(t *testing.T) {
 	}
 
 	// Simulate a crash mid-write by writing garbage directly
-	statePath := filepath.Join(dir, "config", "state.json")
+	statePath := filepath.Join(dir, "config", "state-default.json")
 	if err := os.WriteFile(statePath, []byte("{garbage}"), 0644); err != nil {
 		t.Fatalf("writing garbage: %v", err)
 	}
