@@ -8,8 +8,8 @@ import (
 	"strings"
 
 	"cloud-ide-mount/internal/codespace"
-	"cloud-ide-mount/internal/logging"
 	"cloud-ide-mount/internal/ide"
+	"cloud-ide-mount/internal/logging"
 	"cloud-ide-mount/internal/state"
 
 	"github.com/spf13/cobra"
